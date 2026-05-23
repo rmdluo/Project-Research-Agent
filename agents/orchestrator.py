@@ -20,11 +20,11 @@ def show_panel(title: str, content: str) -> None:
     console.print(Panel(content, title=title, subtitle="Project Agent"))
 
 
-def present_mcp_servers(available: dict[str, list[str]]) -> list[str]:
+def present_mcp_servers(available: list[tuple[str, list[str]]]) -> list[str]:
     """Present available MCP servers and let the user select which to enable.
 
     Args:
-        available: {server_name: [tool_names]} from config.yaml.
+        available: List of (server_name, tool_names) tuples from config.yaml.
 
     Returns:
         List of selected server names.
