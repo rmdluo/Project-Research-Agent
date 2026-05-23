@@ -4,7 +4,7 @@ from typing import Any
 
 from langgraph.types import interrupt
 
-from agents.state import AgentState
+from src.agents.state import AgentState
 
 
 def human_interrupt(state: AgentState) -> dict[str, Any]:

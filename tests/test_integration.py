@@ -2,10 +2,10 @@
 
 import pytest
 
-from agents.graph import build_graph
-from agents.state import AgentState
-from notepad import Notepad
-from mcp_servers.manager import MCPManager
+from src.agents.graph import build_graph
+from src.agents.state import AgentState
+from src.notepad import Notepad
+from src.mcp_servers.manager import MCPManager
 
 
 @pytest.fixture

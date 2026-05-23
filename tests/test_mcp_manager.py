@@ -1,7 +1,7 @@
 """Tests for MCPManager."""
 
 import pytest
-from mcp_servers.manager import MCPManager
+from src.mcp_servers.manager import MCPManager
 
 
 @pytest.fixture

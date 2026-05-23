@@ -5,12 +5,12 @@ import sys
 
 from rich.console import Console
 
-from config import load_env, get_llm_config, load_mcp_config
-from agents.orchestrator import ask_user, present_mcp_servers, present_report
-from agents.graph import build_graph
-from agents.state import AgentState
-from notepad import Notepad
-from mcp_servers.manager import MCPManager
+from src.config import load_env, get_llm_config, load_mcp_config
+from src.agents.orchestrator import ask_user, present_mcp_servers, present_report
+from src.agents.graph import build_graph
+from src.agents.state import AgentState
+from src.notepad import Notepad
+from src.mcp_servers.manager import MCPManager
 
 
 def bootstrap() -> tuple[MCPManager, Notepad, dict]:

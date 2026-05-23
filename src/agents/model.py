@@ -17,7 +17,7 @@ def create_model(
         api_key: Override OPENAI_API_KEY env var.
         temperature: Model temperature (lower = more deterministic).
     """
-    from config import get_llm_config
+    from src.config import get_llm_config
 
     config = get_llm_config()
     return ChatOpenAI(

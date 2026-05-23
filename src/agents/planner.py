@@ -4,9 +4,9 @@ from typing import Any
 
 from langchain_core.messages import HumanMessage
 
-from agents.model import create_model
-from agents.notepad import Notepad
-from agents.state import AgentState
+from src.agents.model import create_model
+from src.agents.notepad import Notepad
+from src.agents.state import AgentState
 
 INTERVIEW_SYSTEM = """You are a Planner agent. Your job is to understand the user's
 project idea by asking targeted questions and then write a detailed specification.

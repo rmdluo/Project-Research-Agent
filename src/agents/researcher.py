@@ -4,9 +4,9 @@ from typing import Any
 
 from langchain_core.messages import HumanMessage
 
-from agents.model import create_model
-from agents.notepad import Notepad
-from agents.state import AgentState
+from src.agents.model import create_model
+from src.agents.notepad import Notepad
+from src.agents.state import AgentState
 
 
 async def research_node(state: AgentState, mcp_manager, notepad: Notepad) -> dict[str, Any]:

@@ -5,13 +5,13 @@ from typing import Any
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 
-from agents.state import AgentState
-from agents.planner import planner_interview, planner_plan_research
-from agents.researcher import research_node
-from agents.interrupt import human_interrupt
-from agents.notepad import Notepad
+from src.agents.state import AgentState
+from src.agents.planner import planner_interview, planner_plan_research
+from src.agents.researcher import research_node
+from src.agents.interrupt import human_interrupt
+from src.agents.notepad import Notepad
 
-from mcp_servers.manager import MCPManager
+from src.mcp_servers.manager import MCPManager
 
 
 def _should_continue(state: AgentState) -> str:
@@ -32,7 +32,7 @@ def _research_router(state: AgentState) -> str:
 
 def _finalize(state: AgentState) -> dict[str, Any]:
     """Generate the final report from the spec and research findings."""
-    from agents.model import create_model
+    from src.agents.model import create_model
 
     model = create_model(temperature=0.2)
 
