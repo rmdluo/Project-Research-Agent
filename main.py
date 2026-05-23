@@ -97,22 +97,22 @@ def run_project_agent():
     console.print("[bold blue]Starting project agent...[/bold blue]")
     console.print()
 
-    result = graph.invoke(initial_state, config=config)
+    try:
+        result = graph.invoke(initial_state, config=config)
 
-    # Show final report
-    if result.get("final_report"):
-        answer = present_report(result["final_report"])
+        # Show final report
+        if result.get("final_report"):
+            answer = present_report(result["final_report"])
 
-        if answer == "signed_off":
-            notepad.save_report(result["final_report"])
-            console.print("\n[green]Report saved to project_notepad.md[/green]")
+            if answer == "signed_off":
+                notepad.save_report(result["final_report"])
+                console.print("\n[green]Report saved to project_notepad.md[/green]")
+            else:
+                console.print("[yellow]Revision requested. Manually edit the notepad and re-run.[/yellow]")
         else:
-            console.print("[yellow]Revision requested. Manually edit the notepad and re-run.[/yellow]")
-    else:
-        console.print("[yellow]No report generated.[/yellow]")
-
-    # Cleanup
-    asyncio.run(mcp_manager.shutdown())
+            console.print("[yellow]No report generated.[/yellow]")
+    finally:
+        asyncio.run(mcp_manager.shutdown())
 
 
 if __name__ == "__main__":

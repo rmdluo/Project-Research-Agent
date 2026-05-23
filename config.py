@@ -28,6 +28,20 @@ def get_llm_config() -> dict[str, str]:
     }
 
 
+def validate_env() -> list[str]:
+    """Validate required environment variables.
+
+    Returns a list of error messages. Empty means all good.
+    """
+    errors = []
+    config = get_llm_config()
+    if not config["api_key"] or config["api_key"].startswith("sk-your"):
+        errors.append(
+            "OPENAI_API_KEY is not set or uses the default placeholder value."
+        )
+    return errors
+
+
 def load_mcp_config() -> list[dict[str, Any]]:
     """Load MCP server definitions from config.yaml.
 

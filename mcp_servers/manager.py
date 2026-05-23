@@ -53,8 +53,10 @@ class MCPManager:
         self._active = True
         return tools_catalog
 
-    async def call_tool(self, server_name: str, tool_name: str, args: dict[str, Any]) -> str:
-        """Execute a tool on a connected MCP server."""
+    async def _call_tool_once(
+        self, server_name: str, tool_name: str, args: dict[str, Any]
+    ) -> str:
+        """Execute a single tool call attempt."""
         if server_name not in self.sessions:
             return f"Error: MCP server '{server_name}' is not connected."
 
@@ -73,6 +75,24 @@ class MCPManager:
             return f"Error: tool '{tool_name}' returned isError flag"
 
         return "\n".join(parts)
+
+    async def call_tool(
+        self,
+        server_name: str,
+        tool_name: str,
+        args: dict[str, Any],
+        max_retries: int = 3,
+    ) -> str:
+        """Execute a tool on a connected MCP server with retry logic."""
+        for attempt in range(max_retries):
+            try:
+                return await self._call_tool_once(server_name, tool_name, args)
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    return f"Error (after {max_retries} retries): {e}"
+                wait = 2**attempt
+                await asyncio.sleep(wait)
+        return "Unexpected: loop completed without return"
 
     async def shutdown(self) -> None:
         """Close all MCP server connections."""
