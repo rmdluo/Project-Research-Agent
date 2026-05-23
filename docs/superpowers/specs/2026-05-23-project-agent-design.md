@@ -108,6 +108,64 @@ project-agent/
 └── .env.example            # Template for environment config
 ```
 
+## MCP Integration (Example: Brave Search)
+
+### Config format
+
+```yaml
+mcp_servers:
+  - name: brave-search
+    command: npx
+    args: ["-y", "@brave/brave-search-mcp-server"]
+    env:
+      BRAVE_API_KEY: "your-api-key"
+    enabled_tools: []   # empty = all tools
+```
+
+### Discovery
+
+The MCP Manager spawns the server as a stdio subprocess, calls `list_tools()`, and exposes the tool catalog to the Orchestrator for user selection.
+
+### Example tools (Brave Search)
+
+| Tool | Purpose |
+|---|---|
+| `brave_web_search` | General web search (query, count, freshness, language, filters) |
+| `brave_news_search` | Recent news articles (with breaking flag, freshness) |
+| `brave_image_search` | Image search (with dimensions, confidence) |
+| `brave_local_search` | Local business search (Pro plan required) |
+| `brave_summarizer` | AI-generated summary (requires key from `brave_web_search` with `summary: true`) |
+
+### How the Researcher uses Brave Search
+
+```python
+# General research
+result = await mcp.call_tool(
+    "brave_web_search",
+    {"query": "Python ML framework pricing 2026", "count": 5, "freshness": "pm"}
+)
+
+# Time-sensitive research
+result = await mcp.call_tool(
+    "brave_news_search",
+    {"query": "AI regulation 2026", "count": 5, "freshness": "pw"}
+)
+
+# Deep-dive (two-step)
+search = await mcp.call_tool("brave_web_search", {"query": "...", "summary": True})
+key = extract_summarizer_key(search)
+summary = await mcp.call_tool("brave_summarizer", {"key": key, "inline_references": True})
+```
+
+### Live progress example
+
+```
+🔍 Researching: Python ML framework pricing...
+   └─ Searching web (5 results, last 31 days)...
+   └─ Found: LangGraph $0 (open source) vs Databricks $1000/mo
+   └─ 5 results aggregated
+```
+
 ## Data Flow
 
 1. User provides project idea via CLI
