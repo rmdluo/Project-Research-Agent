@@ -1,11 +1,13 @@
 """Human-in-the-loop interrupt helper."""
 
+from typing import Any
+
 from langgraph.types import interrupt
 
 from agents.state import AgentState
 
 
-def human_interrupt(state: AgentState) -> dict[str, str]:
+def human_interrupt(state: AgentState) -> dict[str, Any]:
     """Pause the graph and present research findings + pending topics to the user.
 
     Uses LangGraph's interrupt() to pause execution until the user responds.
@@ -14,7 +16,7 @@ def human_interrupt(state: AgentState) -> dict[str, str]:
         state: Current graph state with research_findings and pending_research.
 
     Returns:
-        Dict with 'user_response' key containing the user's text answer.
+        Dict with 'user_response' key and cleared research_queue.
     """
     findings = state.get("research_findings", "(no findings yet)")
     pending = state.get("pending_research", [])
@@ -40,9 +42,14 @@ def human_interrupt(state: AgentState) -> dict[str, str]:
         }
     ])[0]
 
+    user_response = "skip"
     if response.get("type") == "response":
-        return {"user_response": response.get("content", "")}
+        user_response = response.get("content", "")
     elif response.get("type") == "accept":
-        return {"user_response": "proceed"}
-    else:
-        return {"user_response": "skip"}
+        user_response = "proceed"
+
+    return {
+        "user_response": user_response,
+        "research_queue": [],  # Clear queue so plan_research regenerates from findings
+        "pending_research": pending,
+    }

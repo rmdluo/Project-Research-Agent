@@ -63,13 +63,15 @@ class MCPManager:
         session, _, _ = self.sessions[server_name]
         result = await session.call_tool(tool_name, args)
 
+        # Check for structured content on the result object first
+        if hasattr(result, "structuredContent") and result.structuredContent:
+            import json
+            return json.dumps(result.structuredContent)
+
         parts = []
         for content in result.content:
             if isinstance(content, TextContent):
                 parts.append(content.text)
-            elif hasattr(content, "structuredContent") and content.structuredContent:
-                import json
-                parts.append(json.dumps(content.structuredContent))
 
         if result.isError and not parts:
             return f"Error: tool '{tool_name}' returned isError flag"

@@ -1,7 +1,5 @@
 """Researcher node: executes MCP tool calls and summarizes findings."""
 
-import asyncio
-import json
 from typing import Any
 
 from langchain_core.messages import HumanMessage
@@ -11,23 +9,7 @@ from agents.notepad import Notepad
 from agents.state import AgentState
 
 
-def _run_async(coro):
-    """Run async code from a synchronous context."""
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = None
-    if loop:
-        return asyncio.run(asyncio.wait_for(coro, timeout=120))
-    return asyncio.run(coro)
-
-
-async def _call_async(manager, server: str, tool: str, args: dict) -> str:
-    """Async wrapper for MCP tool call."""
-    return await manager.call_tool(server, tool, args)
-
-
-def research_node(state: AgentState, mcp_manager, notepad: Notepad) -> dict[str, Any]:
+async def research_node(state: AgentState, mcp_manager, notepad: Notepad) -> dict[str, Any]:
     """Execute research tasks from the queue using MCP tools.
 
     For each task:
@@ -91,8 +73,8 @@ def research_node(state: AgentState, mcp_manager, notepad: Notepad) -> dict[str,
             if chosen_server in mcp_manager.sessions:
                 try:
                     progress.append(f"  Calling {chosen_server}/{chosen_tool}...")
-                    raw = _run_async(
-                        _call_async(mcp_manager, chosen_server, chosen_tool, chosen_args or {"query": topic})
+                    raw = await mcp_manager.call_tool(
+                        chosen_server, chosen_tool, chosen_args or {"query": topic}
                     )
                     progress.append(f"  Got {len(raw)} chars")
 

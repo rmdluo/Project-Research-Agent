@@ -87,8 +87,8 @@ def build_graph(mcp_manager: MCPManager, notepad: Notepad) -> Any:
     def _plan_research(state: AgentState) -> dict[str, Any]:
         return planner_plan_research(state, notepad)
 
-    def _do_research(state: AgentState) -> dict[str, Any]:
-        return research_node(state, mcp_manager, notepad)
+    async def _do_research(state: AgentState) -> dict[str, Any]:
+        return await research_node(state, mcp_manager, notepad)
 
     def _interrupt_flow(state: AgentState) -> dict[str, Any]:
         return human_interrupt(state)
