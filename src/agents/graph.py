@@ -91,11 +91,11 @@ def build_graph(tools: list[BaseTool], notepad: Notepad) -> Any:
 
     def _plan_research(state: AgentState) -> dict[str, Any]:
         logging.info("Running Plan Research Node")
-        return planner_plan_research(state, notepad)
+        return planner_plan_research(state, notepad, tools=tools)
 
     async def _do_research(state: AgentState) -> dict[str, Any]:
         logging.info("Running Do Research Node")
-        return await research_node(state, notepad)
+        return await research_node(state, notepad, tools=tools)
 
     def _interrupt_flow(state: AgentState) -> dict[str, Any]:
         logging.info("Running Interrupt Flow Node")

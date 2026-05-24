@@ -61,7 +61,7 @@ def planner_interview(state: AgentState, notepad: Notepad) -> dict[str, Any]:
 
     project_idea = state['project_idea']
     transcript: list[dict] = []  # [{"questions": [...], "answers": [...]}]
-    max_rounds = 0 # 100
+    max_rounds = 100
 
     for round_num in range(max_rounds):
         # Phase 1: Decide if we have enough info, or generate new questions
@@ -165,14 +165,20 @@ OUTPUT THE SPEC ONLY -- no preamble, no conversational text."""
     }
 
 
-def planner_plan_research(state: AgentState, notepad: Notepad) -> dict[str, Any]:
+def planner_plan_research(
+    state: AgentState,
+    notepad: Notepad,
+    tools: list[Any] | None = None,
+) -> dict[str, Any]:
     """Review the spec and determine what research is needed.
 
     Returns an updated research_queue.
     """
     model = create_model(temperature=0.2)
 
-    tool_names = state.get("mcp_tools", [])
+    if tools is None:
+        tools = []
+    tool_names = [t.name for t in tools] if tools else []
     research_prompt = f"""Based on this project spec, identify what research is needed.
 Be specific about what to look up (prices, comparisons, alternatives, etc.).
 

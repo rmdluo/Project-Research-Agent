@@ -13,6 +13,7 @@ from src.agents.state import AgentState
 async def research_node(
     state: AgentState,
     notepad: Notepad,
+    tools: list[Any] | None = None,
 ) -> dict[str, Any]:
     """Execute research tasks from the queue using MCP tools.
 
@@ -34,8 +35,10 @@ async def research_node(
     queue = state.get("research_queue", [])
     progress = state.get("progress_messages", [])
 
+    if tools is None:
+        tools = []
+
     # Build tool lookup
-    tools = state.get("mcp_tools", [])
     tool_map = {t.name: t for t in tools}
     bound_model = model.bind_tools(tools)
 
