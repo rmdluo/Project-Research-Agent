@@ -64,7 +64,7 @@ async def _run_project_async(notepad, project_idea, mcp_configs) -> None:
 
     config = {"configurable": {"thread_id": "default"}}
 
-    result = graph.invoke(initial_state, config=config)
+    result = await graph.ainvoke(initial_state, config=config)
 
     if result.get("final_report"):
         answer = present_report(result["final_report"])

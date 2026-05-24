@@ -1,5 +1,6 @@
 """Researcher node: executes MCP tool calls and summarizes findings."""
 
+import asyncio
 from typing import Any
 
 from langchain_core.messages import HumanMessage
@@ -20,6 +21,8 @@ async def research_node(
     2. Execute the tool calls the model generates
     3. Summarize the results
 
+    All tasks in the queue are executed in parallel.
+
     Args:
         state: Current graph state.
         notepad: Notepad instance for writing findings.
@@ -36,8 +39,6 @@ async def research_node(
     tool_map = {t.name: t for t in tools}
     bound_model = model.bind_tools(tools)
 
-    print(queue)
-
     if not queue:
         progress.append("No research tasks to execute.")
         return {
@@ -46,23 +47,20 @@ async def research_node(
             "progress_messages": progress,
         }
 
-    findings_parts = []
-    remaining_tasks = list(queue)
-
-    for task in queue:
+    async def _run_task(task: dict[str, Any]) -> tuple[str, str | None]:
+        """Run a single research task. Returns (finding, task_description) on success, or (error_msg, task_description) on failure."""
         topic = task["description"]
         progress.append(f"Researching: {topic}")
 
-        # Let the model decide which tools to call
         try:
-            response = bound_model.invoke([
+            response = await bound_model.ainvoke([
                 HumanMessage(content=f"Research this topic: {topic}"),
             ])
             tool_calls = getattr(response, "tool_calls", [])
 
             if not tool_calls:
                 progress.append(f"  No tool call generated")
-                continue
+                return f"\n### {topic}\n_No tool calls generated_", task["description"]
 
             all_results = []
             for call in tool_calls:
@@ -85,17 +83,29 @@ async def research_node(
                     f"Summarize these findings for '{topic}':\n\n{combined[:4000]}\n\n"
                     f"Concise bullet points with key facts and source URLs."
                 )
-                summary = model.invoke([
+                summary = (await model.ainvoke([
                     HumanMessage(content=summary_prompt),
-                ]).content.strip()
-                findings_parts.append(f"\n### {topic}\n{summary}")
-                remaining_tasks.remove(task)
-                progress.append(f"  Done")
+                ])).content.strip()
+                return f"\n### {topic}\n{summary}", task["description"]
             else:
-                progress.append(f"  No results collected")
+                return f"\n### {topic}\n_No results collected_", task["description"]
 
         except Exception as e:
             progress.append(f"  Error: {e}")
+            return f"\n### {topic}\nError: {e}", task["description"]
+
+    results = await asyncio.gather(*[_run_task(t) for t in queue], return_exceptions=True)
+
+    findings_parts = []
+    completed_descriptions = set()
+    for result in results:
+        if isinstance(result, Exception):
+            continue
+        finding, task_desc = result
+        findings_parts.append(finding)
+        completed_descriptions.add(task_desc)
+
+    remaining_tasks = [t for t in queue if t["description"] not in completed_descriptions]
 
     findings_text = "".join(findings_parts)
     notepad.append_section("Research Findings", findings_text)

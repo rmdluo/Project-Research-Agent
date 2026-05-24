@@ -93,9 +93,9 @@ def build_graph(tools: list[BaseTool], notepad: Notepad) -> Any:
         logging.info("Running Plan Research Node")
         return planner_plan_research(state, notepad)
 
-    def _do_research(state: AgentState) -> dict[str, Any]:
+    async def _do_research(state: AgentState) -> dict[str, Any]:
         logging.info("Running Do Research Node")
-        return asyncio.run(research_node(state, notepad))
+        return await research_node(state, notepad)
 
     def _interrupt_flow(state: AgentState) -> dict[str, Any]:
         logging.info("Running Interrupt Flow Node")
@@ -108,32 +108,31 @@ def build_graph(tools: list[BaseTool], notepad: Notepad) -> Any:
     # Add nodes
     builder.add_node("interview", _interview)
     builder.add_node("plan_research", _plan_research)
-    # builder.add_node("research", _do_research)
-    # builder.add_node("interrupt", _interrupt_flow)
-    # builder.add_node("finalize", _finalize_report)
+    builder.add_node("research", _do_research)
+    builder.add_node("interrupt", _interrupt_flow)
+    builder.add_node("finalize", _finalize_report)
 
     # Edges
     builder.add_edge(START, "interview")
     builder.add_edge("interview", "plan_research")
-    builder.add_edge("plan_research", END)
-    # builder.add_conditional_edges(
-    #     "plan_research",
-    #     _should_continue,
-    #     {
-    #         "research": "research",
-    #         "finalize": "finalize",
-    #     },
-    # )
-    # builder.add_conditional_edges(
-    #     "research",
-    #     _research_router,
-    #     {
-    #         "research": "interrupt",
-    #         "finalize": "finalize",
-    #     },
-    # )
-    # builder.add_edge("interrupt", "plan_research")
-    # builder.add_edge("finalize", END)
+    builder.add_conditional_edges(
+        "plan_research",
+        _should_continue,
+        {
+            "research": "research",
+            "finalize": "finalize",
+        },
+    )
+    builder.add_conditional_edges(
+        "research",
+        _research_router,
+        {
+            "research": "interrupt",
+            "finalize": "finalize",
+        },
+    )
+    builder.add_edge("interrupt", "plan_research")
+    builder.add_edge("finalize", END)
 
     # Compile with checkpointer for human-in-the-loop support
     checkpointer = InMemorySaver()
