@@ -64,7 +64,6 @@ def planner_interview(state: AgentState, notepad: Notepad) -> dict[str, Any]:
     max_rounds = 0 # 100
 
     for round_num in range(max_rounds):
-        print(round_num)
         # Phase 1: Decide if we have enough info, or generate new questions
         if transcript:
             decide_prompt = INTERVIEW_SYSTEM + f"""
@@ -79,9 +78,7 @@ Interview transcript:
 
 Do you have enough information to write a detailed spec?"""
 
-            decision = decision_model.invoke([HumanMessage(content=decide_prompt)])
-            print(decision)
-            decision = decision.complete
+            decision = decision_model.invoke([HumanMessage(content=decide_prompt)]).complete
             if decision:
                 break
 
