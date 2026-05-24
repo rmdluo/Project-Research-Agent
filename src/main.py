@@ -42,6 +42,7 @@ async def _run_project_async(notepad, project_idea, mcp_configs) -> None:
     else:
         console.print("\nNo MCP servers configured.")
         tools = []
+        tool_names = []
 
     graph = build_graph(tools, notepad)
 
@@ -56,14 +57,14 @@ async def _run_project_async(notepad, project_idea, mcp_configs) -> None:
         "planning_complete": False,
         "final_report": "",
         "progress_messages": [],
-        "mcp_tools": tools,
+        "mcp_tools": tool_names,
         "selected_mcp_servers": list(mcp_configs.keys()) if mcp_configs else [],
         "report_signed_off": False,
     }
 
     config = {"configurable": {"thread_id": "default"}}
 
-    result = await graph.invoke(initial_state, config=config)
+    result = graph.invoke(initial_state, config=config)
 
     if result.get("final_report"):
         answer = present_report(result["final_report"])

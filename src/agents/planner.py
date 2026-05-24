@@ -61,7 +61,7 @@ def planner_interview(state: AgentState, notepad: Notepad) -> dict[str, Any]:
 
     project_idea = state['project_idea']
     transcript: list[dict] = []  # [{"questions": [...], "answers": [...]}]
-    max_rounds = 1 # 100
+    max_rounds = 0 # 100
 
     for round_num in range(max_rounds):
         print(round_num)
@@ -175,7 +175,7 @@ def planner_plan_research(state: AgentState, notepad: Notepad) -> dict[str, Any]
     """
     model = create_model(temperature=0.2)
 
-    tool_names = [t.name for t in state.get("mcp_tools", [])]
+    tool_names = state.get("mcp_tools", [])
     research_prompt = f"""Based on this project spec, identify what research is needed.
 Be specific about what to look up (prices, comparisons, alternatives, etc.).
 
