@@ -40,8 +40,8 @@ class AgentState(TypedDict):
     # Progress messages for display to the user
     progress_messages: list[str]
 
-    # MCP tool catalog: {server_name: [tool_name, ...]}
-    mcp_tools: dict[str, list[str]]
+    # MCP tools loaded from servers
+    mcp_tools: list[Any]
 
     # User's selected MCP servers to use
     selected_mcp_servers: list[str]

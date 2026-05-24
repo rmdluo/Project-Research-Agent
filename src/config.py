@@ -1,16 +1,16 @@
 """Configuration loader for project-agent."""
 
+import json
 import os
 from pathlib import Path
 from typing import Any
 
-import yaml
 from dotenv import load_dotenv
 
 # Default paths
 BASE_DIR = Path(__file__).parent.parent
 ENV_PATH = BASE_DIR / ".env"
-CONFIG_PATH = BASE_DIR / "config.yaml"
+CONFIG_PATH = BASE_DIR / "config.json"
 
 
 def load_env() -> None:
@@ -42,20 +42,16 @@ def validate_env() -> list[str]:
     return errors
 
 
-def load_mcp_config() -> list[dict[str, Any]]:
-    """Load MCP server definitions from config.yaml.
+def load_mcp_config() -> dict[str, Any]:
+    """Load MCP server definitions from config.json.
 
-    Returns a list of dicts with keys:
-      - name: str
-      - command: str
-      - args: list[str]
-      - env: dict[str, str] (optional)
-      - enabled_tools: list[str] (optional, empty = all)
+    Returns a dict mapping server_name -> connection_config,
+    ready to pass to MultiServerMCPClient.
     """
     if not CONFIG_PATH.exists():
-        return []
+        return {}
 
     with open(CONFIG_PATH) as f:
-        data = yaml.safe_load(f)
+        data = json.load(f)
 
-    return data.get("mcp_servers", [])
+    return data.get("mcp_servers", {})

@@ -3,8 +3,6 @@
 from rich.console import Console
 from rich.panel import Panel
 from rich.prompt import Prompt
-from rich.live import Live
-from rich.text import Text
 
 console = Console()
 
@@ -18,40 +16,6 @@ def ask_user(question: str, default: str | None = None) -> str:
 def show_panel(title: str, content: str) -> None:
     """Display content in a styled panel."""
     console.print(Panel(content, title=title, subtitle="Project Agent"))
-
-
-def present_mcp_servers(available: list[tuple[str, list[str]]]) -> list[str]:
-    """Present available MCP servers and let the user select which to enable.
-
-    Args:
-        available: List of (server_name, tool_names) tuples from config.yaml.
-
-    Returns:
-        List of selected server names.
-    """
-    console.print()
-    console.print("[bold]Available MCP Servers:[/bold]")
-    for i, (name, tools) in enumerate(available, 1):
-        desc = ", ".join(tools[:5])
-        console.print(f"  [bold]{i}[/bold]. [cyan]{name}[/cyan] — {desc}")
-    console.print("  0. None (no MCP tools)")
-
-    answer = Prompt.ask(
-        "Select servers to enable (comma-separated numbers)",
-        default="0",
-    )
-    selected = []
-    for part in answer.split(","):
-        part = part.strip()
-        if part == "0":
-            continue
-        try:
-            idx = int(part) - 1
-            if 0 <= idx < len(available):
-                selected.append(available[idx][0])
-        except ValueError:
-            pass
-    return selected
 
 
 def present_research_choices(

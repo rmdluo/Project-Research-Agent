@@ -4,8 +4,7 @@ import pytest
 
 from src.agents.graph import build_graph
 from src.agents.state import AgentState
-from src.notepad import Notepad
-from src.mcp_servers.manager import MCPManager
+from src.agents.notepad import Notepad
 
 
 @pytest.fixture
@@ -15,21 +14,15 @@ def tmp_notepad(tmp_path):
     return Notepad(str(p))
 
 
-@pytest.fixture
-def tmp_mcp_manager():
-    """Create an MCP manager with no active connections."""
-    return MCPManager()
-
-
-def test_graph_builds(tmp_notepad, tmp_mcp_manager):
-    """Verify the graph can be built with mocked MCP manager."""
-    graph = build_graph(tmp_mcp_manager, tmp_notepad)
+def test_graph_builds(tmp_notepad):
+    """Verify the graph can be built with empty tools."""
+    graph = build_graph([], tmp_notepad)
     assert graph is not None
 
 
-def test_initial_state_has_all_keys(tmp_notepad, tmp_mcp_manager):
+def test_initial_state_has_all_keys(tmp_notepad):
     """Verify the initial state has all required keys."""
-    graph = build_graph(tmp_mcp_manager, tmp_notepad)
+    graph = build_graph([], tmp_notepad)
     # The compiled graph should accept a valid initial state
     state: AgentState = {
         "messages": [],
@@ -42,7 +35,7 @@ def test_initial_state_has_all_keys(tmp_notepad, tmp_mcp_manager):
         "planning_complete": False,
         "final_report": "",
         "progress_messages": [],
-        "mcp_tools": {},
+        "mcp_tools": [],
         "selected_mcp_servers": [],
         "report_signed_off": False,
     }

@@ -1,7 +1,9 @@
 """Main LangGraph state graph definition for the project-agent."""
 
 from typing import Any
+import asyncio
 
+from langchain_core.tools import BaseTool
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 
@@ -10,8 +12,6 @@ from src.agents.planner import planner_interview, planner_plan_research
 from src.agents.researcher import research_node
 from src.agents.interrupt import human_interrupt
 from src.agents.notepad import Notepad
-
-from src.mcp_servers.manager import MCPManager
 
 
 def _should_continue(state: AgentState) -> str:
@@ -68,11 +68,11 @@ OUTPUT THE REPORT ONLY -- no preamble."""
     }
 
 
-def build_graph(mcp_manager: MCPManager, notepad: Notepad) -> Any:
+def build_graph(tools: list[BaseTool], notepad: Notepad) -> Any:
     """Build and compile the agent graph.
 
     Args:
-        mcp_manager: MCPManager with active server connections.
+        tools: List of LangChain BaseTool instances from MCP servers.
         notepad: Shared Notepad instance.
 
     Returns:
@@ -87,8 +87,8 @@ def build_graph(mcp_manager: MCPManager, notepad: Notepad) -> Any:
     def _plan_research(state: AgentState) -> dict[str, Any]:
         return planner_plan_research(state, notepad)
 
-    async def _do_research(state: AgentState) -> dict[str, Any]:
-        return await research_node(state, mcp_manager, notepad)
+    def _do_research(state: AgentState) -> dict[str, Any]:
+        return asyncio.run(research_node(state, notepad))
 
     def _interrupt_flow(state: AgentState) -> dict[str, Any]:
         return human_interrupt(state)
@@ -106,14 +106,15 @@ def build_graph(mcp_manager: MCPManager, notepad: Notepad) -> Any:
     # Edges
     builder.add_edge(START, "interview")
     builder.add_edge("interview", "plan_research")
-    builder.add_conditional_edges(
-        "plan_research",
-        _should_continue,
-        {
-            "research": "research",
-            "finalize": "finalize",
-        },
-    )
+    builder.add_edge("plan_research", END)
+    # builder.add_conditional_edges(
+    #     "plan_research",
+    #     _should_continue,
+    #     {
+    #         "research": "research",
+    #         "finalize": "finalize",
+    #     },
+    # )
     builder.add_conditional_edges(
         "research",
         _research_router,
