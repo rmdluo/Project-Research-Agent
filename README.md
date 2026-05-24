@@ -33,10 +33,11 @@ OBE until I get it to a spot I am decently happy with (which may be never).
 
 ## Roadmap
 
- - Feat: Seperate the MCPs for the different agents
+ - Feat: Separate the MCPs for the different agents
  - Feat: Better integrate internet lookups into the planning phase
  - Feat: Report back with research results before writing final spec, give chance for user to request more research
  - Feat: Rework the notepad to allow for list of freeform notes rather than specific sections
+ - Feat: Separate the final report from the notepad.
  - UI: Vibe code UI (probably streamlit)
  - Integration: Integrate with LangFuse
 
