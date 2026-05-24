@@ -1,0 +1,13 @@
+{
+    "mcp_servers": {
+        "brave_search": {
+            "transport": "stdio",
+            "command": "docker",
+            "args": ["run", "-i", "--rm", "-e", "BRAVE_API_KEY",
+"docker.io/mcp/brave-search:latest"],
+            "env": {
+                "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+            }
+        }
+    }
+}
